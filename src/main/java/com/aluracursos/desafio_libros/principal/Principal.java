@@ -6,15 +6,16 @@ import com.aluracursos.desafio_libros.model.DatosLibros;
 import com.aluracursos.desafio_libros.service.ConsumoAPI;
 import com.aluracursos.desafio_libros.service.ConvierteDatos;
 
-import java.util.Comparator;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
 
 public class Principal {
     private static final String URL_BASE = "https://gutendex.com/books/";
     private ConsumoAPI consumoAPI = new ConsumoAPI();
     private ConvierteDatos conversor = new ConvierteDatos();
     private Scanner teclado = new Scanner(System.in);
+
+    // Lista para almacenar y mantener en memoria el historial de todos los libros encontrados durante la ejecución
+    private List<DatosLibros> datosLibros = new ArrayList<>();
 
     public void muestraElMenu(){
         // Usa la clase consumoAPI para traer el contenido crudo (JSON) desde la URL de Gutendex
@@ -23,6 +24,10 @@ public class Principal {
         // Toma el texto JSON y usa el conversor (Jackson) para transformarlo en objetos de la clase Datos
         var datos = conversor.obtenerDatos(json,Datos.class);
         System.out.println(datos);
+
+        // Recorre la lista de historial y muestra en consola cada título guardado en letras mayúsculas
+        System.out.println("Tu historial de búsqueda");
+        datosLibros.forEach(l -> System.out.println(l.titulo().toUpperCase()));
 
         //Top 10 libros más descargados
         System.out.println("Top 10 libros más descargados");
@@ -50,6 +55,13 @@ public class Principal {
         // Verifica si el contenedor Optional tiene un valor adentro antes de intentar mostrarlo
         if (libroBuscado.isPresent()){
             System.out.println("Libro encontrado ");
+            // 1. Guardamos el libro que encontramos en una variable
+            var libro = libroBuscado.get();
+
+            // 2. ¡Lo agregamos a nuestra lista de historial!
+            datosLibros.add(libro);
+            System.out.println(libro);
+
             // Extrae y muestra el objeto libro que está guardado dentro del Optional
             System.out.println(libroBuscado.get());
         }else {
