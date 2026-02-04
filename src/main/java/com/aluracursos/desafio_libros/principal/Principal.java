@@ -7,11 +7,15 @@ import com.aluracursos.desafio_libros.service.ConsumoAPI;
 import com.aluracursos.desafio_libros.service.ConvierteDatos;
 
 import java.util.Comparator;
+import java.util.Optional;
+import java.util.Scanner;
 
 public class Principal {
     private static final String URL_BASE = "https://gutendex.com/books/";
     private ConsumoAPI consumoAPI = new ConsumoAPI();
     private ConvierteDatos conversor = new ConvierteDatos();
+    private Scanner teclado = new Scanner(System.in);
+
     public void muestraElMenu(){
         // Usa la clase consumoAPI para traer el contenido crudo (JSON) desde la URL de Gutendex
         var json = consumoAPI.obtenerDatos(URL_BASE);
@@ -30,5 +34,26 @@ public class Principal {
                 // Transforma cada objeto libro para extraer solo su título y convertirlo a letras mayúsculas
                 .map(l -> l.titulo().toUpperCase())
                 .forEach(System.out::println);
+
+        //Busqueda de libros por nombre
+        System.out.println("Ingrese el nombre del libro que desea buscar");
+        // Captura la entrada del usuario desde el teclado y la guarda en una variable
+        var tituloLibro = teclado.nextLine();
+        // Llama a la API concatenando el nombre buscado, reemplazando espacios por "+" para que la URL sea válida
+        json = consumoAPI.obtenerDatos(URL_BASE+"?search=" + tituloLibro.replace(" ", "+"));
+        // Convierte el nuevo JSON recibido en nuestra estructura de objetos Datos
+        var datosBuqueda = conversor.obtenerDatos(json, Datos.class);
+        // Usa Streams para filtrar la lista y busca el primer libro que coincida con el título (usando Optional para evitar errores si no hay nada)
+        Optional<DatosLibros> libroBuscado = datosBuqueda.resultados().stream()
+                .filter(l -> l.titulo().toUpperCase().contains(tituloLibro.toUpperCase()))
+                .findFirst();
+        // Verifica si el contenedor Optional tiene un valor adentro antes de intentar mostrarlo
+        if (libroBuscado.isPresent()){
+            System.out.println("Libro encontrado ");
+            // Extrae y muestra el objeto libro que está guardado dentro del Optional
+            System.out.println(libroBuscado.get());
+        }else {
+            System.out.println("Libro no encontrado");
+        }
     }
 }
