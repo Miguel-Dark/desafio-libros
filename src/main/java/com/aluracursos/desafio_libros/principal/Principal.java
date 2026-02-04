@@ -55,6 +55,7 @@ public class Principal {
         // Verifica si el contenedor Optional tiene un valor adentro antes de intentar mostrarlo
         if (libroBuscado.isPresent()){
             System.out.println("Libro encontrado ");
+
             // 1. Guardamos el libro que encontramos en una variable
             var libro = libroBuscado.get();
 
